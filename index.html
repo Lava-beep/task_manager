@@ -27,6 +27,34 @@
       letter-spacing: 1px;
       margin-bottom: 2rem;
     }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2.5rem;
+    }
+    .header-logo {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #6366f1 60%, #818cf8 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 2rem;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.15);
+    }
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #3730a3;
+      margin-bottom: 0.7rem;
+      margin-top: 2rem;
+      letter-spacing: 0.5px;
+    }
     form {
       display: flex;
       flex-wrap: wrap;
@@ -72,6 +100,25 @@
       background: linear-gradient(90deg, #4f46e5 60%, #6366f1 100%);
       box-shadow: 0 4px 16px rgba(99,102,241,0.12);
     }
+    .search-bar {
+      width: 100%;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .search-bar input {
+      flex: 1;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    .search-bar input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px #6366f133;
+    }
     .filters {
       display: flex;
       gap: 1.5rem;
@@ -115,6 +162,35 @@
       color: #3730a3;
       font-weight: 600;
     }
+    .task .info .tags {
+      margin-top: 0.2em;
+      font-size: 0.93em;
+      color: #6366f1;
+    }
+    .task .info .desc {
+      color: #555;
+      font-size: 0.98em;
+      margin: 0.3em 0 0.2em 0;
+    }
+    .task .info .meta {
+      font-size: 0.85em;
+      color: #888;
+      margin-top: 0.2em;
+    }
+    .task .type-icon {
+      display: inline-block;
+      width: 1.7em;
+      height: 1.7em;
+      border-radius: 50%;
+      background: #f3f4f6;
+      color: #6366f1;
+      text-align: center;
+      line-height: 1.7em;
+      font-size: 1.1em;
+      margin-right: 0.6em;
+      vertical-align: middle;
+      border: 1.5px solid #e0e7ff;
+    }
     .task .actions {
       display: flex;
       flex-direction: column;
@@ -137,10 +213,29 @@
       background: #6366f1;
       color: #fff;
     }
-    .priority-urgent { color: #dc2626; font-weight: bold; }
-    .priority-high { color: #ea580c; }
-    .priority-med { color: #ca8a04; }
-    .priority-low { color: #16a34a; }
+    .task .actions button.edit-btn {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+    .task .actions button.edit-btn:hover {
+      background: #818cf8;
+      color: #fff;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.18em 0.7em;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-left: 0.3em;
+      vertical-align: middle;
+    }
+    .badge-priority-urgent { background: #fee2e2; color: #dc2626; }
+    .badge-priority-high { background: #ffedd5; color: #ea580c; }
+    .badge-priority-med { background: #fef9c3; color: #ca8a04; }
+    .badge-priority-low { background: #dcfce7; color: #16a34a; }
+    .badge-status-completed { background: #dbeafe; color: #2563eb; }
+    .badge-status-pending { background: #fef3c7; color: #b45309; }
     @media (max-width: 600px) {
       .container {
         padding: 1rem 0.5rem;
@@ -170,7 +265,11 @@
 </head>
 <body>
   <div class="container">
-    <h1>Task Manager</h1>
+    <div class="header">
+      <div class="header-logo">🗂️</div>
+      <h1>Task Manager</h1>
+    </div>
+    <div class="section-title">Add New Task</div>
     <form id="taskForm">
       <input type="text" id="title" placeholder="Task title" required />
       <input type="date" id="dueDate" required />
@@ -187,9 +286,15 @@
         <option value="med">Med</option>
         <option value="low">Low</option>
       </select>
+      <input type="text" id="tags" placeholder="Tags (comma separated)" />
       <button type="submit">Add Task</button>
+      <textarea id="description" placeholder="Description (optional)" style="flex-basis:100%;border-radius:8px;border:1px solid #d1d5db;padding:0.6rem 0.9rem;font-size:1rem;margin-top:0.5rem;"></textarea>
     </form>
 
+    <div class="section-title">Tasks</div>
+    <div class="search-bar">
+      <input type="text" id="search" placeholder="Search tasks by title, description, or tags..." />
+    </div>
     <div class="filters">
       <div>
         <label>Filter:
@@ -218,8 +323,21 @@
     const taskList = document.getElementById('taskList');
     const filter = document.getElementById('filter');
     const sort = document.getElementById('sort');
+    const search = document.getElementById('search');
 
     let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    let editIndex = null;
+
+    function getTypeIcon(type) {
+      const icons = {
+        Home: "🏠",
+        School: "🎓",
+        Work: "💼",
+        Project1: "📁",
+        Project2: "📂"
+      };
+      return icons[type] || "🗂️";
+    }
 
     function saveTasks() {
       localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -233,6 +351,16 @@
         return true;
       });
 
+      // Search filter
+      const q = search.value.trim().toLowerCase();
+      if (q) {
+        filtered = filtered.filter(task =>
+          task.title.toLowerCase().includes(q) ||
+          (task.description && task.description.toLowerCase().includes(q)) ||
+          (task.tags && task.tags.join(',').toLowerCase().includes(q))
+        );
+      }
+
       if (sort.value === 'dueDate') {
         filtered.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
       } else if (sort.value === 'priority') {
@@ -245,12 +373,17 @@
         div.className = `task ${task.completed ? 'completed' : ''}`;
         div.innerHTML = `
           <div class="info">
-            <strong>${task.title}</strong><br>
-            Due: ${task.dueDate} | Type: ${task.type} | 
-            <span class="priority-${task.priority}">${task.priority}</span>
+            <span class="type-icon">${getTypeIcon(task.type)}</span>
+            <strong>${task.title}</strong>
+            <span class="badge badge-priority-${task.priority}">${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</span>
+            <span class="badge badge-status-${task.completed ? 'completed' : 'pending'}">${task.completed ? 'Completed' : 'Pending'}</span>
+            <div class="desc">${task.description ? task.description : ''}</div>
+            <div class="tags">${task.tags && task.tags.length ? 'Tags: ' + task.tags.map(t => `<span style="background:#e0e7ff;color:#3730a3;padding:0.1em 0.5em;border-radius:8px;margin-right:0.2em;">${t.trim()}</span>`).join('') : ''}</div>
+            <div class="meta">Due: ${task.dueDate} | Type: ${task.type} | Created: ${task.createdAt ? task.createdAt : ''}</div>
           </div>
           <div class="actions">
             <button onclick="toggleComplete(${index})">${task.completed ? 'Undo' : 'Done'}</button>
+            <button class="edit-btn" onclick="editTask(${index})">Edit</button>
             <button onclick="deleteTask(${index})">Delete</button>
           </div>
         `;
@@ -270,6 +403,18 @@
       renderTasks();
     }
 
+    function editTask(index) {
+      const task = tasks[index];
+      document.getElementById('title').value = task.title;
+      document.getElementById('dueDate').value = task.dueDate;
+      document.getElementById('type').value = task.type;
+      document.getElementById('priority').value = task.priority;
+      document.getElementById('tags').value = task.tags ? task.tags.join(', ') : '';
+      document.getElementById('description').value = task.description || '';
+      editIndex = index;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     taskForm.addEventListener('submit', e => {
       e.preventDefault();
       const newTask = {
@@ -277,9 +422,20 @@
         dueDate: document.getElementById('dueDate').value,
         type: document.getElementById('type').value,
         priority: document.getElementById('priority').value,
-        completed: false
+        tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean),
+        description: document.getElementById('description').value,
+        completed: false,
+        createdAt: new Date().toLocaleString()
       };
-      tasks.push(newTask);
+      if (editIndex !== null) {
+        // Preserve completed and createdAt
+        newTask.completed = tasks[editIndex].completed;
+        newTask.createdAt = tasks[editIndex].createdAt;
+        tasks[editIndex] = newTask;
+        editIndex = null;
+      } else {
+        tasks.push(newTask);
+      }
       saveTasks();
       taskForm.reset();
       renderTasks();
@@ -287,6 +443,12 @@
 
     filter.addEventListener('change', renderTasks);
     sort.addEventListener('change', renderTasks);
+    search.addEventListener('input', renderTasks);
+
+    // Expose editTask and toggleComplete/deleteTask for inline onclick
+    window.editTask = editTask;
+    window.toggleComplete = toggleComplete;
+    window.deleteTask = deleteTask;
 
     renderTasks();
   </script>
