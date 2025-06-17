@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Personal Assistant Web App</title>
+  <style>
+    :root {
+      --bg-light: #f0f2f5;
+      --bg-dark: #1e1e2f;
+      --bg-high-contrast: #000000;
+
+      --text-light: #2c3e50;
+      --text-dark: #ecf0f1;
+      --text-high-contrast: #ffffff;
+
+      --section-bg-light: #ffffff;
+      --section-bg-dark: #2c2c3c;
+      --section-bg-high-contrast: #333333;
+
+      --hover-color: #2980b9;
+      --button-color-light: #3498db;
+      --button-color-dark: #6a5acd; /* Medium Slate Blue */
+      --button-color-high-contrast: #00ff00; /* Bright Green */
+
+      --border-color-light: #ccc;
+      --border-color-dark: #555;
+      --border-color-high-contrast: #00ff00;
+
+      --list-bg-light: #ecf0f1;
+      --list-bg-dark: #3b3b4d;
+      --list-bg-high-contrast: #666666;
+
+      --small-text-light: #555;
+      --small-text-dark: #bbb;
+      --small-text-high-contrast: #dddddd;
+
+      --delete-btn-light: #c0392b;
+      --delete-btn-hover-light: #e74c3c;
+      --delete-btn-dark: #e74c3c;
+      --delete-btn-hover-dark: #ff6347; /* Tomato */
+      --delete-btn-high-contrast: #ff0000;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      margin: 0;
+      padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    body.high-contrast {
+      background-color: var(--bg-high-contrast);
+      color: var(--text-high-contrast);
+    }
+
+    h1, h2 {
+      margin-top: 0;
+    }
+
+    section {
+      background: var(--section-bg-light);
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, background-color 0.3s;
+    }
+
+    body.dark section {
+      background: var(--section-bg-dark);
+    }
+
+    body.high-contrast section {
+      background: var(--section-bg-high-contrast);
+      border: 1px solid var(--border-color-high-contrast);
+    }
+
+    section:hover {
+      transform: scale(1.01);
+    }
+
+    input, textarea, button, select {
+      padding: 10px;
+      margin: 8px 0;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--border-color-light);
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: var(--section-bg-light); /* Inherit from section for consistency */
+      color: var(--text-light);
+    }
+
+    body.dark input, body.dark textarea, body.dark select {
+      border: 1px solid var(--border-color-dark);
+      background-color: var(--list-bg-dark); /* Darker background for inputs */
+      color: var(--text-dark);
+    }
+
+    body.high-contrast input, body.high-contrast textarea, body.high-contrast select {
+      border: 1px solid var(--border-color-high-contrast);
+      background-color: var(--section-bg-high-contrast);
+      color: var(--text-high-contrast);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button {
+      background-color: var(--button-color-light);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    body.dark button {
+      background-color: var(--button-color-dark);
+    }
+
+    body.high-contrast button {
+      background-color: var(--button-color-high-contrast);
+      color: var(--bg-high-contrast); /* Text color contrast for high-contrast button */
+    }
+
+    button:hover {
+      background-color: var(--hover-color);
+      transform: scale(1.02);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    li {
+      padding: 8px 10px;
+      margin: 6px 0;
+      background-color: var(--list-bg-light);
+      border-radius: 6px;
+      position: relative;
+      font-size: 14px;
+    }
+
+    body.dark li {
+      background-color: var(--list-bg-dark);
+    }
+
+    body.high-contrast li {
+      background-color: var(--list-bg-high-contrast);
+      border: 1px solid var(--border-color-high-contrast);
+    }
+
+    .delete-btn {
+      color: var(--delete-btn-light);
+      font-weight: bold;
+      position: absolute;
+      right: 10px;
+      top: 8px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .delete-btn:hover {
+      color: var(--delete-btn-hover-light);
+    }
+
+    body.dark .delete-btn {
+      color: var(--delete-btn-dark);
+    }
+
+    body.dark .delete-btn:hover {
+      color: var(--delete-btn-hover-dark);
+    }
+
+    body.high-contrast .delete-btn {
+      color: var(--delete-btn-high-contrast);
+    }
+    
+    body.high-contrast .delete-btn:hover {
+      color: var(--delete-btn-high-contrast);
+      filter: brightness(1.2);
+    }
+
+    strong {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    small {
+      font-size: 12px;
+      color: var(--small-text-light);
+    }
+
+    body.dark small {
+      color: var(--small-text-dark);
+    }
+
+    body.high-contrast small {
+      color: var(--small-text-high-contrast);
+    }
+
+    .theme-toggle {
+      margin-bottom: 20px;
+      text-align: right;
+    }
+
+    .theme-toggle select {
+      width: auto;
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    .main-hero-graphic {
+      display: block;
+      margin: 0 auto 30px auto;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1 60%, #818cf8 100%);
+      box-shadow: 0 8px 32px rgba(99,102,241,0.13), 0 2px 8px rgba(99,102,241,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .main-hero-graphic svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .section-graphic-bar {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      margin-top: -1.2rem;
+    }
+    .section-graphic-bar svg {
+      width: 90%;
+      max-width: 420px;
+      height: 60px;
+      display: block;
+    }
+    .graphic {
+      border-radius: 12px;
+      background: #e0e7ff;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+      padding: 6px;
+    }
+    .graphic-task {
+      background: #f1f5ff;
+      border-radius: 50%;
+      padding: 5px;
+      width: 54px;
+      height: 54px;
+      margin-bottom: 10px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.10);
+    }
+    .graphic-budget {
+      background: #f0fff4;
+      border-radius: 50%;
+      padding: 5px;
+      width: 54px;
+      height: 54px;
+      margin-bottom: 10px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 2px 8px rgba(16,185,129,0.10);
+    }
+    .graphic-notes {
+      background: #fff7ed;
+      border-radius: 50%;
+      padding: 5px;
+      width: 54px;
+      height: 54px;
+      margin-bottom: 10px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 2px 8px rgba(251,146,60,0.10);
+    }
+
+    /* Scrollbar for lists */
+    ul::-webkit-scrollbar {
+      width: 6px;
+    }
+    ul::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ul::-webkit-scrollbar-thumb {
+      background-color: #bbb;
+      border-radius: 3px;
+    }
+
+    body.dark ul::-webkit-scrollbar-thumb {
+      background-color: #666;
+    }
+
+    body.high-contrast ul::-webkit-scrollbar-thumb {
+      background-color: var(--border-color-high-contrast);
+    }
+
+    /* Chart canvas */
+    #budgetChart {
+      display: block;
+      margin: 15px auto;
+      max-width: 100%;
+      height: 180px;
+    }
+
+    /* Related notes box */
+    #relatedNotes {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--small-text-light);
+    }
+
+    body.dark #relatedNotes {
+      color: var(--small-text-dark);
+    }
+
+    body.high-contrast #relatedNotes {
+      color: var(--small-text-high-contrast);
+    }
+
+    /* Achievements */
+    .achievement-badge {
+      display: inline-block;
+      background-color: #f39c12; /* Carrot */
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-left: 5px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-hero-graphic">
+    <!-- Abstract SVG Hero Graphic -->
+    <svg viewBox="0 0 120 120" fill="none">
+      <circle cx="60" cy="60" r="54" fill="#6366f1"/>
+      <ellipse cx="60" cy="60" rx="40" ry="54" fill="#818cf8" opacity="0.7"/>
+      <ellipse cx="60" cy="60" rx="24" ry="40" fill="#a5b4fc" opacity="0.5"/>
+      <circle cx="40" cy="50" r="8" fill="#fff" opacity="0.18"/>
+      <circle cx="80" cy="80" r="6" fill="#fff" opacity="0.13"/>
+      <rect x="50" y="90" width="20" height="8" rx="4" fill="#fff" opacity="0.09"/>
+    </svg>
+  </div>
+  <div class="section-graphic-bar">
+    <!-- Decorative SVG Bar -->
+    <svg viewBox="0 0 420 60" fill="none">
+      <rect x="10" y="10" width="400" height="40" rx="20" fill="#e0e7ff"/>
+      <circle cx="60" cy="30" r="18" fill="#6366f1" opacity="0.18"/>
+      <circle cx="360" cy="30" r="18" fill="#818cf8" opacity="0.18"/>
+      <rect x="120" y="20" width="180" height="20" rx="10" fill="#a5b4fc" opacity="0.13"/>
+    </svg>
+  </div>
+
+  <div class="theme-toggle">
+    <label for="themeSelector">Theme:</label>
+    <select id="themeSelector" onchange="setTheme(this.value)">
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+      <option value="high-contrast">High Contrast</option>
+    </select>
+  </div>
+
+  <h1>Personal Assistant</h1>
+
+  <section id="tasks">
+    <span class="graphic-task">
+      <!-- SVG for tasks -->
+      <svg viewBox="0 0 48 48" fill="none">
+        <rect x="6" y="10" width="36" height="28" rx="8" fill="#6366f1"/>
+        <rect x="12" y="16" width="24" height="16" rx="5" fill="#fff" opacity="0.7"/>
+        <circle cx="24" cy="24" r="4" fill="#818cf8" opacity="0.7"/>
+      </svg>
+    </span>
+    <h2>Task Manager</h2>
+    <input id="taskInput" type="text" placeholder="Add new task" />
+    <input id="taskDue" type="date" />
+    <select id="taskPriority">
+      <option value="Low">Low Priority</option>
+      <option value="Medium" selected>Medium Priority</option>
+      <option value="High">High Priority</option>
+    </select>
+    <select id="taskCategory">
+      <option value="Work" selected>Work</option>
+      <option value="Personal">Personal</option>
+      <option value="Health">Health</option>
+      <option value="Other">Other</option>
+    </select>
+    <select id="taskRepeat">
+      <option value="none" selected>No Repeat</option>
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+    <button onclick="addTask()">Add Task</button>
+
+    <ul id="taskList"></ul>
+
+    <div id="taskStats"></div>
+    <div id="achievementDisplay"></div>
+  </section>
+
+  <section id="budget">
+    <span class="graphic-budget">
+      <!-- SVG for budget -->
+      <svg viewBox="0 0 48 48" fill="none">
+        <ellipse cx="24" cy="24" rx="18" ry="14" fill="#10b981" opacity="0.18"/>
+        <rect x="12" y="18" width="24" height="12" rx="6" fill="#10b981" opacity="0.7"/>
+        <rect x="18" y="22" width="12" height="4" rx="2" fill="#fff" opacity="0.7"/>
+        <circle cx="24" cy="24" r="3" fill="#fff" opacity="0.7"/>
+      </svg>
+    </span>
+    <h2>Budget Tracker</h2>
+
+    <input id="expenseName" type="text" placeholder="Income/Expense Name" />
+    <input id="expenseAmount" type="number" placeholder="Amount (€)" />
+    <select id="expenseCategory">
+      <option value="Income">Income</option>
+      <option value="Food">Food</option>
+      <option value="Transport">Transport</option>
+      <option value="Utilities">Utilities</option>
+      <option value="Entertainment">Entertainment</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <input id="monthlyGoal" type="number" placeholder="Set Monthly Budget Goal (€)" />
+
+    <button onclick="addExpense()">Add Income/Expense</button>
+
+    <ul id="expenseList"></ul>
+
+    <strong>Total Balance: €<span id="total">0</span></strong>
+
+    <canvas id="budgetChart" width="300" height="180"></canvas>
+
+    <div id="budgetInsight"></div>
+  </section>
+
+  <section id="notes">
+    <span class="graphic-notes">
+      <!-- SVG for notes -->
+      <svg viewBox="0 0 48 48" fill="none">
+        <rect x="8" y="12" width="32" height="24" rx="6" fill="#fb923c" opacity="0.18"/>
+        <rect x="14" y="18" width="20" height="12" rx="4" fill="#fb923c" opacity="0.7"/>
+        <rect x="18" y="22" width="12" height="4" rx="2" fill="#fff" opacity="0.7"/>
+      </svg>
+    </span>
+    <h2>Note Taking</h2>
+
+    <input id="noteTitle" type="text" placeholder="Title" />
+    <textarea id="noteText" placeholder="Write a note using basic Markdown (e.g. **bold**, *italic*, # heading)"></textarea>
+    <input id="noteTags" type="text" placeholder="Tags (comma-separated)" />
+    <select id="noteCategory">
+      <option value="General" selected>General</option>
+      <option value="Ideas">Ideas</option>
+      <option value="Tasks">Tasks</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <button onclick="addNote()">Save Note</button>
+
+    <input id="searchNote" type="text" placeholder="Search Notes..." oninput="searchNotes()" />
+
+    <ul id="noteList"></ul>
+
+    <div id="relatedNotes"></div>
+  </section>
+
+<script>
+  // === Theme Toggle ===
+  const body = document.body;
+  const themeKey = 'appTheme';
+
+  function setTheme(theme) {
+    body.classList.remove('light', 'dark', 'high-contrast');
+    body.classList.add(theme);
+    localStorage.setItem(themeKey, theme);
+    document.getElementById('themeSelector').value = theme;
+  }
+
+  // === Load saved theme on startup ===
+  window.onload = () => {
+    const savedTheme = localStorage.getItem(themeKey) || 'light';
+    setTheme(savedTheme);
+    loadTasks();
+    loadExpenses();
+    loadNotes();
+    checkDailyReset();
+    updateAchievementsDisplay();
+  };
+
+  // ================= TASKS ===================
+  const taskKey = 'tasks';
+  const achievementKey = 'achievements';
+  const dailyTrackerKey = 'dailyTracker';
+
+  function getAchievements() {
+    return JSON.parse(localStorage.getItem(achievementKey)) || {
+      score: 0,
+      completedTasks: 0,
+      dailyStreak: 0,
+      lastCompletionDate: null,
+      badges: []
+    };
+  }
+
+  function saveAchievements(achievements) {
+    localStorage.setItem(achievementKey, JSON.stringify(achievements));
+  }
+
+  function getDailyTracker() {
+    return JSON.parse(localStorage.getItem(dailyTrackerKey)) || {
+      lastResetDate: null,
+      dailyTasksCompleted: 0
+    };
+  }
+
+  function saveDailyTracker(tracker) {
+    localStorage.setItem(dailyTrackerKey, JSON.stringify(tracker));
+  }
+
+  function checkDailyReset() {
+    const tracker = getDailyTracker();
+    const today = new Date().toDateString();
+
+    if (tracker.lastResetDate !== today) {
+      // It's a new day, reset daily tasks completed and potentially streak
+      let achievements = getAchievements();
+      if (tracker.lastResetDate) { // Only check streak if there was a previous day
+        const lastDate = new Date(tracker.lastResetDate);
+        const diffTime = Math.abs(new Date().getTime() - lastDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 1) { // If more than one day passed, break streak
+          achievements.dailyStreak = 0;
+          saveAchievements(achievements);
+        }
+      }
+      
+      tracker.dailyTasksCompleted = 0;
+      tracker.lastResetDate = today;
+      saveDailyTracker(tracker);
+    }
+  }
+
+
+  function addTask() {
+    const text = document.getElementById('taskInput').value.trim();
+    const due = document.getElementById('taskDue').value;
+    let priority = document.getElementById('taskPriority').value;
+    const category = document.getElementById('taskCategory').value;
+    const repeat = document.getElementById('taskRepeat').value;
+
+    if(!text) return alert('Task text cannot be empty.');
+
+    // Smart suggestion: adjust priority based on due date
+    if(due) {
+      const dueDate = new Date(due);
+      const now = new Date();
+      const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+      if(diffDays <= 1 && priority !== 'High') priority = 'High';
+      else if(diffDays <= 3 && priority === 'Low') priority = 'Medium';
+    }
+
+    const tasks = JSON.parse(localStorage.getItem(taskKey)) || [];
+    tasks.push({
+      text, due, priority, category, repeat, completed: false, addedDate: new Date().toISOString()
+    });
+    localStorage.setItem(taskKey, JSON.stringify(tasks));
+
+    document.getElementById('taskInput').value = '';
+    document.getElementById('taskDue').value = '';
+    loadTasks();
+  }
+
+  function loadTasks() {
+    const taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
+
+    const tasks = JSON.parse(localStorage.getItem(taskKey)) || [];
+    // Sort by due date ascending, then by priority (High > Medium > Low)
+    const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
+    tasks.sort((a, b) => {
+      // Sort by completion status first (uncompleted first)
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+
+      // Then by due date
+      if (a.due && b.due) {
+        const dateA = new Date(a.due);
+        const dateB = new Date(b.due);
+        if (dateA - dateB !== 0) return dateA - dateB;
+      } else if (a.due) {
+        return -1; // tasks with due dates come before those without
+      } else if (b.due) {
+        return 1;
+      }
+
+      // Then by priority
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+
+    // Display each task
+    tasks.forEach((t, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <input type="checkbox" onchange="toggleTaskCompletion(${i})" ${t.completed ? 'checked' : ''}>
+        <strong style="${t.completed ? 'text-decoration: line-through; color: #777;' : ''}">${escapeHtml(t.text)}</strong>
+        <small>
+          Due: ${t.due || 'N/A'} | Priority: ${t.priority} | Category: ${t.category} | Repeat: ${t.repeat}
+        </small>
+        <span class="delete-btn" onclick="deleteTask(${i})" title="Delete Task">&times;</span>
+      `;
+      taskList.appendChild(li);
+    });
+
+    // Completion stats
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.completed).length;
+    document.getElementById('taskStats').innerText =
+      `Total Tasks: ${totalTasks} | Completed: ${completedTasks}`;
+    
+    updateAchievementsDisplay();
+  }
+
+  function toggleTaskCompletion(i) {
+    const tasks = JSON.parse(localStorage.getItem(taskKey)) || [];
+    if(i < 0 || i >= tasks.length) return;
+
+    tasks[i].completed = !tasks[i].completed;
+
+    let achievements = getAchievements();
+    let tracker = getDailyTracker();
+    const today = new Date().toDateString();
+
+    if (tasks[i].completed) {
+      achievements.score += 10; // Points for completion
+      achievements.completedTasks++;
+      tracker.dailyTasksCompleted++;
+
+      // Streak logic
+      if (achievements.lastCompletionDate === today) {
+        // Task completed on the same day, no streak change
+      } else if (achievements.lastCompletionDate) {
+        const lastDate = new Date(achievements.lastCompletionDate);
+        const diffTime = Math.abs(new Date().getTime() - lastDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) { // If completed yesterday
+          achievements.dailyStreak++;
+          achievements.score += 5; // Bonus for streak continuation
+        } else { // Streak broken
+          achievements.dailyStreak = 1;
+        }
+      } else { // First completion ever
+        achievements.dailyStreak = 1;
+      }
+      achievements.lastCompletionDate = today;
+
+      // Check for badges
+      if (achievements.dailyStreak >= 3 && !achievements.badges.includes('Daily Achiever')) {
+        achievements.badges.push('Daily Achiever');
+        achievements.score += 50; // Bonus for badge
+        alert('Achievement Unlocked: Daily Achiever! Keep up the great work!');
+      }
+      if (achievements.completedTasks >= 10 && !achievements.badges.includes('Task Master')) {
+        achievements.badges.push('Task Master');
+        achievements.score += 100; // Bonus for badge
+        alert('Achievement Unlocked: Task Master! You are a productivity pro!');
+      }
+
+    } else { // If task is uncompleted
+      achievements.score = Math.max(0, achievements.score - 10); // Deduct points, but not below 0
+      achievements.completedTasks = Math.max(0, achievements.completedTasks - 1);
+      tracker.dailyTasksCompleted = Math.max(0, tracker.dailyTasksCompleted - 1);
+      // Streak logic for uncompletion is more complex and usually not handled this way, so we'll simplify: streak only increases on completion.
+    }
+
+    saveAchievements(achievements);
+    saveDailyTracker(tracker);
+    localStorage.setItem(taskKey, JSON.stringify(tasks));
+    loadTasks(); // Reload to update display and stats
+  }
+
+
+  function deleteTask(i) {
+    const tasks = JSON.parse(localStorage.getItem(taskKey)) || [];
+    if(i < 0 || i >= tasks.length) return;
+    tasks.splice(i, 1);
+    localStorage.setItem(taskKey, JSON.stringify(tasks));
+    loadTasks();
+  }
+
+  function updateAchievementsDisplay() {
+    const achievements = getAchievements();
+    const tracker = getDailyTracker();
+    const achievementDisplay = document.getElementById('achievementDisplay');
+
+    let badgesHtml = '';
+    if (achievements.badges.length > 0) {
+      badgesHtml = '<br><strong>Badges:</strong> ';
+      achievements.badges.forEach(badge => {
+        badgesHtml += `<span class="achievement-badge">${badge}</span>`;
+      });
+    }
+
+    achievementDisplay.innerHTML = `
+      <strong>Your Score:</strong> ${achievements.score} points<br>
+      <strong>Daily Streak:</strong> ${achievements.dailyStreak} days
+      ${badgesHtml}
+      <br><small>Today's Tasks Completed: ${tracker.dailyTasksCompleted}</small>
+    `;
+  }
+
+  // ================= BUDGET ===================
+  const expenseKey = 'expenses';
+  const goalKey = 'monthlyGoal';
+
+  function addExpense() {
+    const name = document.getElementById('expenseName').value.trim();
+    const amount = parseFloat(document.getElementById('expenseAmount').value);
+    const category = document.getElementById('expenseCategory').value;
+    let monthlyGoal = parseFloat(document.getElementById('monthlyGoal').value);
+
+    if(!name) return alert('Name cannot be empty.');
+    if(isNaN(amount)) return alert('Enter a valid amount.');
+
+    if(isNaN(monthlyGoal) || monthlyGoal < 0) monthlyGoal = 0;
+
+    const expenses = JSON.parse(localStorage.getItem(expenseKey)) || [];
+    expenses.push({ name, amount, category, date: new Date().toISOString() });
+    localStorage.setItem(expenseKey, JSON.stringify(expenses));
+    localStorage.setItem(goalKey, monthlyGoal.toString());
+
+    document.getElementById('expenseName').value = '';
+    document.getElementById('expenseAmount').value = '';
+    document.getElementById('monthlyGoal').value = monthlyGoal > 0 ? monthlyGoal : '';
+
+    loadExpenses();
+  }
+
+  function loadExpenses() {
+    const expenseList = document.getElementById('expenseList');
+    expenseList.innerHTML = '';
+    const expenses = JSON.parse(localStorage.getItem(expenseKey)) || [];
+    const monthlyGoal = parseFloat(localStorage.getItem(goalKey)) || 0;
+
+    let total = 0;
+    const categoryTotals = {};
+
+    expenses.forEach((e, i) => {
+      const li = document.createElement('li');
+      const sign = e.category === 'Income' ? '+' : '-';
+      const amountAbs = Math.abs(e.amount).toFixed(2);
+      li.innerHTML = `
+        <strong>${escapeHtml(e.name)}</strong>
+        <small>Category: ${e.category} | Amount: ${sign}€${amountAbs}</small>
+        <span class="delete-btn" onclick="deleteExpense(${i})" title="Delete Entry">&times;</span>
+      `;
+      expenseList.appendChild(li);
+
+      total += e.category === 'Income' ? e.amount : -Math.abs(e.amount);
+
+      // Only track actual expenses for the pie chart
+      if (e.category !== 'Income') {
+        categoryTotals[e.category] = (categoryTotals[e.category] || 0) + Math.abs(e.amount);
+      }
+    });
+
+    // Display total balance
+    document.getElementById('total').innerText = total.toFixed(2);
+
+    // Show spending insights & recommendation
+    const budgetInsight = document.getElementById('budgetInsight');
+    if(monthlyGoal > 0) {
+      budgetInsight.innerHTML = `<strong>Monthly Budget Goal:</strong> €${monthlyGoal.toFixed(2)}<br>`;
+      if(total >= 0 && total <= monthlyGoal) { // Positive balance and within goal
+        budgetInsight.innerHTML += `<span style="color:green">You are within your budget. Great job!</span>`;
+      } else if (total < 0) { // Negative balance, over budget
+        budgetInsight.innerHTML += `<span style="color:red">Your balance is negative. Consider reducing expenses.</span>`;
+      }
+      else { // Positive balance, but exceeded goal
+        budgetInsight.innerHTML += `<span style="color:red">You have exceeded your budget goal by €${(total - monthlyGoal).toFixed(2)}. Consider reducing expenses.</span>`;
+      }
+    } else {
+      budgetInsight.innerHTML = `<em>Set a monthly budget goal above to track spending.</em>`;
+    }
+
+    drawBudgetChart(categoryTotals);
+  }
+
+  function deleteExpense(i) {
+    const expenses = JSON.parse(localStorage.getItem(expenseKey)) || [];
+    if(i < 0 || i >= expenses.length) return;
+    expenses.splice(i, 1);
+    localStorage.setItem(expenseKey, JSON.stringify(expenses));
+    loadExpenses();
+  }
+
+  function drawBudgetChart(categoryTotals) {
+    const canvas = document.getElementById('budgetChart');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const categories = Object.keys(categoryTotals);
+    const values = categories.map(c => categoryTotals[c]);
+    const total = values.reduce((a,b) => a+b, 0);
+
+    // If no expenses, display message
+    if(total === 0) {
+      ctx.fillStyle = body.classList.contains('dark') ? '#bbb' : '#999';
+      ctx.font = '16px "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('No expense data to display', w/2, h/2);
+      return;
+    }
+
+    const colors = ['#3498db','#e74c3c','#f1c40f','#2ecc71','#9b59b6','#34495e', '#d35400', '#c0392b'];
+
+    let startAngle = -0.5 * Math.PI; // Start from top
+    const radius = Math.min(w, h) / 2 - 20; // Adjust radius for legend space
+
+    categories.forEach((cat, i) => {
+      const sliceAngle = (values[i]/total) * 2 * Math.PI;
+      
+      // Draw slice
+      ctx.beginPath();
+      ctx.moveTo(w/2, h/2);
+      ctx.arc(w/2, h/2, radius, startAngle, startAngle + sliceAngle);
+      ctx.closePath();
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fill();
+      ctx.strokeStyle = body.classList.contains('dark') ? '#2c2c3c' : '#ffffff'; // Border color for slices
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Add text label for percentage inside slice (optional, for smaller charts, legends are better)
+      const midAngle = startAngle + sliceAngle / 2;
+      const labelX = w/2 + (radius * 0.7) * Math.cos(midAngle);
+      const labelY = h/2 + (radius * 0.7) * Math.sin(midAngle);
+      ctx.fillStyle = 'white'; // Text color for slice labels
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      if (values[i]/total > 0.05) { // Only show label if slice is big enough
+        ctx.fillText(`${((values[i]/total)*100).toFixed(0)}%`, labelX, labelY);
+      }
+
+      startAngle += sliceAngle;
+    });
+
+    // Draw Legend
+    const legendX = 10;
+    let legendY = 20;
+    ctx.font = '12px "Segoe UI", Tahoma, Geneva, Verdana, sans-serif';
+    ctx.textAlign = 'left';
+
+    categories.forEach((cat, i) => {
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fillRect(legendX, legendY - 8, 10, 10); // Color box
+      ctx.fillStyle = body.classList.contains('dark') ? '#ecf0f1' : '#2c3e50'; // Text color
+      ctx.fillText(`${cat}: €${categoryTotals[cat].toFixed(2)}`, legendX + 15, legendY);
+      legendY += 20;
+    });
+  }
+
+  // ================= NOTES ===================
+  const noteKey = 'notes';
+
+  // Basic markdown parser for **bold**, *italic*, # headings
+  function parseMarkdown(text) {
+    // Escape html first
+    text = escapeHtml(text);
+    // # heading
+    text = text.replace(/^# (.*)$/gm, '<h3>$1</h3>');
+    // **bold**
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // *italic*
+    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    // new lines to <br>
+    text = text.replace(/\n/g, '<br>');
+    return text;
+  }
+
+  function addNote() {
+    const title = document.getElementById('noteTitle').value.trim();
+    const text = document.getElementById('noteText').value.trim();
+    const tagsRaw = document.getElementById('noteTags').value.trim();
+    const category = document.getElementById('noteCategory').value;
+
+    if(!title || !text) return alert('Title and note text are required.');
+
+    const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim().toLowerCase()) : [];
+
+    const notes = JSON.parse(localStorage.getItem(noteKey)) || [];
+    notes.push({ title, text, tags, category, created: new Date().toISOString() });
+    localStorage.setItem(noteKey, JSON.stringify(notes));
+
+    document.getElementById('noteTitle').value = '';
+    document.getElementById('noteText').value = '';
+    document.getElementById('noteTags').value = '';
+
+    loadNotes();
+  }
+
+  function loadNotes() {
+    const noteList = document.getElementById('noteList');
+    noteList.innerHTML = '';
+    const notes = JSON.parse(localStorage.getItem(noteKey)) || [];
+
+    notes.forEach((note, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <strong>${escapeHtml(note.title)}</strong>
+        <div>${parseMarkdown(note.text)}</div>
+        <small>Tags: ${note.tags.join(', ') || 'None'} | Category: ${note.category}</small>
+        <span class="delete-btn" onclick="deleteNote(${i})" title="Delete Note">&times;</span>
+      `;
+      noteList.appendChild(li);
+    });
+  }
+
+  function deleteNote(i) {
+    const notes = JSON.parse(localStorage.getItem(noteKey)) || [];
+    if(i < 0 || i >= notes.length) return;
+    notes.splice(i, 1);
+    localStorage.setItem(noteKey, JSON.stringify(notes));
+    loadNotes();
+  }
+
+  // Search notes by title, tags, or content
+  function searchNotes() {
+    const query = document.getElementById('searchNote').value.toLowerCase();
+    const notes = JSON.parse(localStorage.getItem(noteKey)) || [];
+    const filtered = notes.filter(note =>
+      note.title.toLowerCase().includes(query) ||
+      note.tags.some(t => t.includes(query)) ||
+      note.text.toLowerCase().includes(query)
+    );
+
+    const noteList = document.getElementById('noteList');
+    noteList.innerHTML = '';
+    filtered.forEach((note, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <strong>${escapeHtml(note.title)}</strong>
+        <div>${parseMarkdown(note.text)}</div>
+        <small>Tags: ${note.tags.join(', ') || 'None'} | Category: ${note.category}</small>
+        <span class="delete-btn" onclick="deleteNote(${i})" title="Delete Note">&times;</span>
+      `;
+      noteList.appendChild(li);
+    });
+
+    // Show related notes count
+    const relatedNotes = document.getElementById('relatedNotes');
+    relatedNotes.textContent = `Found ${filtered.length} matching notes.`;
+  }
+
+  // Utility: escape html to prevent injection
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+</script>
+</body>
+</html>
